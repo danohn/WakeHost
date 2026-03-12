@@ -125,7 +125,9 @@ final class WOLService {
         }
 
         let normalizedAddress = trimmedAddress.contains("://") ? trimmedAddress : "https://\(trimmedAddress)"
-        guard let components = URLComponents(string: normalizedAddress), let host = components.host else {
+        guard let components = URLComponents(string: normalizedAddress),
+              let host = components.host,
+              !host.isEmpty else {
             throw WOLServiceError.invalidURL
         }
 

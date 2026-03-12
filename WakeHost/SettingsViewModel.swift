@@ -24,6 +24,20 @@ class SettingsViewModel: ObservableObject {
     }
 
     var connectionValidation: ConnectionValidation {
+        Self.validateConnection(
+            address: address,
+            port: port,
+            key: key,
+            secret: secret
+        )
+    }
+
+    static func validateConnection(
+        address: String,
+        port: String,
+        key: String,
+        secret: String
+    ) -> ConnectionValidation {
         let trimmedAddress = address.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedPort = port.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -34,7 +48,9 @@ class SettingsViewModel: ObservableObject {
         }
 
         let normalizedAddress = trimmedAddress.contains("://") ? trimmedAddress : "https://\(trimmedAddress)"
-        guard let components = URLComponents(string: normalizedAddress), components.host != nil else {
+        guard let components = URLComponents(string: normalizedAddress),
+              let host = components.host,
+              !host.isEmpty else {
             return .error("Enter a valid OPNsense address.")
         }
 
@@ -69,7 +85,7 @@ class SettingsViewModel: ObservableObject {
     }
 }
 
-enum ConnectionValidation {
+enum ConnectionValidation: Equatable {
     case success(String)
     case warning(String)
     case error(String)
