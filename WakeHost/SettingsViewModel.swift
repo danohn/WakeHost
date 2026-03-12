@@ -3,18 +3,14 @@ import Combine
 
 @MainActor
 class SettingsViewModel: ObservableObject {
-    @Published var address: String {
-        didSet { UserDefaults.standard.set(address, forKey: "opn_address") }
-    }
-    @Published var port: String {
-        didSet { UserDefaults.standard.set(port, forKey: "opn_port") }
-    }
+    @Published var address: String
+    @Published var port: String
     @Published var key: String
     @Published var secret: String
 
     init() {
         self.address = UserDefaults.standard.string(forKey: "opn_address") ?? ""
-        self.port = UserDefaults.standard.string(forKey: "opn_port") ?? "7443"
+        self.port = UserDefaults.standard.string(forKey: "opn_port") ?? ""
         self.key = KeychainHelper.get("opn_key") ?? ""
         self.secret = KeychainHelper.get("opn_secret") ?? ""
     }
@@ -44,14 +40,14 @@ class SettingsViewModel: ObservableObject {
         let trimmedSecret = secret.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedAddress.isEmpty else {
-            return .warning("Enter your OPNsense address.")
+            return .warning("Enter your OPNsense IP address or hostname.")
         }
 
         let normalizedAddress = trimmedAddress.contains("://") ? trimmedAddress : "https://\(trimmedAddress)"
         guard let components = URLComponents(string: normalizedAddress),
               let host = components.host,
               !host.isEmpty else {
-            return .error("Enter a valid OPNsense address.")
+            return .error("Enter a valid IP address or hostname.")
         }
 
         guard !trimmedPort.isEmpty else {
@@ -67,6 +63,24 @@ class SettingsViewModel: ObservableObject {
         }
 
         return .success("Ready to connect.")
+    }
+
+    func saveConnection(address: String, port: String) {
+        let trimmedAddress = address.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPort = port.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        self.address = trimmedAddress
+        self.port = trimmedPort
+
+        UserDefaults.standard.set(trimmedAddress, forKey: "opn_address")
+        UserDefaults.standard.set(trimmedPort, forKey: "opn_port")
+    }
+
+    func clearConnection() {
+        address = ""
+        port = ""
+        UserDefaults.standard.removeObject(forKey: "opn_address")
+        UserDefaults.standard.removeObject(forKey: "opn_port")
     }
 
     func saveCredentials(key: String, secret: String) {

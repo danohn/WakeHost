@@ -1,10 +1,14 @@
 import SwiftUI
 
 struct SettingsView: View {
+    @Environment(\.openWindow) private var openWindow
+
     @ObservedObject var viewModel: SettingsViewModel
     @ObservedObject var appPreferences: AppPreferences
 
-    @State private var selectedTab: SettingsTab = .connection
+    @State private var selectedTab: SettingsTab = .setup
+    @State private var draftAddress = ""
+    @State private var draftPort = ""
     @State private var draftKey = ""
     @State private var draftSecret = ""
     @State private var isTestingConnection = false
@@ -21,23 +25,70 @@ struct SettingsView: View {
     var body: some View {
         TabView(selection: $selectedTab) {
             Form {
-                Section {
-                    LabeledContent("Address") {
-                        TextField("opnsense.example.com", text: $viewModel.address)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(minWidth: 260)
-                            .autocorrectionDisabled()
+                VStack(alignment: .leading, spacing: 14) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Address")
+                            .font(.headline)
+                        TextField(
+                            "",
+                            text: $draftAddress,
+                            prompt: Text("IP address or hostname")
+                        )
+                        .textFieldStyle(.roundedBorder)
+                        .autocorrectionDisabled()
+                        .accessibilityLabel("Address")
                     }
 
-                    LabeledContent("Port") {
-                        TextField("7443", text: $viewModel.port)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 80)
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Port")
+                            .font(.headline)
+                        TextField(
+                            "",
+                            text: $draftPort,
+                            prompt: Text("7443")
+                        )
+                        .textFieldStyle(.roundedBorder)
+                        .frame(width: 110)
+                        .accessibilityLabel("Port")
                     }
-                }
 
-                Section {
-                    connectionStatusRow
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("API Key")
+                            .font(.headline)
+                        SecureField(
+                            "",
+                            text: $draftKey,
+                            prompt: Text("API Key")
+                        )
+                        .textFieldStyle(.roundedBorder)
+                        .accessibilityLabel("API Key")
+                    }
+
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("API Secret")
+                            .font(.headline)
+                        SecureField(
+                            "",
+                            text: $draftSecret,
+                            prompt: Text("API Secret")
+                        )
+                        .textFieldStyle(.roundedBorder)
+                        .accessibilityLabel("API Secret")
+                    }
+
+                    if case .success = setupValidation {
+                        EmptyView()
+                    } else {
+                        connectionStatusRow
+                    }
+
+                    HStack {
+                        Button("Save Settings") {
+                            saveSettings()
+                        }
+                        .disabled(!hasSetupChanges)
+                        .controlSize(.small)
+                    }
 
                     HStack {
                         Button("Test Connection") {
@@ -45,7 +96,8 @@ struct SettingsView: View {
                                 await testConnection()
                             }
                         }
-                        .disabled(isTestingConnection)
+                        .disabled(isTestingConnection || !canTestConnection)
+                        .controlSize(.small)
 
                         if isTestingConnection {
                             ProgressView()
@@ -55,113 +107,134 @@ struct SettingsView: View {
 
                     if let testConnectionMessage {
                         Text(testConnectionMessage)
-                            .font(.caption)
+                            .font(.caption.weight(.semibold))
                             .foregroundStyle(testConnectionColor)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
+                .padding(.vertical, 6)
             }
             .tabItem {
-                Label("Connection", systemImage: "network")
+                Label("Setup", systemImage: "network")
             }
-            .tag(SettingsTab.connection)
+            .tag(SettingsTab.setup)
 
             Form {
-                Section {
-                    LabeledContent("API Key") {
-                        SecureField("Required", text: $draftKey)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(minWidth: 260)
-                    }
+                VStack(alignment: .leading, spacing: 16) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Toggle("Open at Login", isOn: openAtLoginBinding)
 
-                    LabeledContent("API Secret") {
-                        SecureField("Required", text: $draftSecret)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(minWidth: 260)
-                    }
-                }
-
-                Section {
-                    Text("WakeHost stores your API credentials securely in Keychain.")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    Button("Save Credentials") {
-                        saveCredentials()
-                    }
-                    .disabled(!hasCredentialChanges)
-
-                    Button("Clear Credentials", role: .destructive) {
-                        clearCredentials()
-                    }
-                }
-            }
-            .tabItem {
-                Label("Credentials", systemImage: "key.fill")
-            }
-            .tag(SettingsTab.credentials)
-
-            Form {
-                Section {
-                    Toggle("Open at Login", isOn: openAtLoginBinding)
-
-                    Text(appPreferences.openAtLoginSummary)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-
-                if let loginItemErrorMessage = appPreferences.loginItemErrorMessage {
-                    Section {
-                        Text(loginItemErrorMessage)
+                        Text(appPreferences.openAtLoginSummary)
                             .font(.caption)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+
+                        if let loginItemErrorMessage = appPreferences.loginItemErrorMessage {
+                            Text(loginItemErrorMessage)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+
+                        if appPreferences.needsLoginItemApproval {
+                            Button("Open Login Items Settings") {
+                                appPreferences.openLoginItemsSettings()
+                            }
+                            .controlSize(.small)
+                        }
+                    }
+
+                    Divider()
+
+                    VStack(alignment: .leading, spacing: 8) {
+                        Button("Reset Setup", role: .destructive) {
+                            resetSettingsAndShowOnboarding()
+                        }
+                        .controlSize(.small)
+
+                        Text("Clears saved connection details and credentials, then reopens setup.")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
-
-                if appPreferences.needsLoginItemApproval {
-                    Section {
-                        Button("Open Login Items Settings") {
-                            appPreferences.openLoginItemsSettings()
-                        }
-                    }
-                }
+                .padding(.vertical, 6)
             }
             .tabItem {
                 Label("General", systemImage: "gearshape")
             }
             .tag(SettingsTab.general)
         }
-        .frame(width: 460, height: 300)
+        .frame(width: 460, height: 340)
         .scenePadding()
         .onAppear {
             appPreferences.refreshLoginItemStatus()
-            loadCredentialDrafts()
+            loadDrafts()
         }
     }
 
     @ViewBuilder
     private var connectionStatusRow: some View {
-        let validation = viewModel.connectionValidation
+        let validation = setupValidation
 
         HStack(alignment: .top, spacing: 10) {
             Image(systemName: validation.systemImage)
                 .imageScale(.medium)
                 .foregroundStyle(connectionStatusColor(for: validation))
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(validation.message)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.primary)
-                Text("Used to reach your OPNsense server from the menu bar utility.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
+            Text(validation.message)
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.primary)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .padding(.vertical, 2)
+    }
+
+    private var setupValidation: ConnectionValidation {
+        SettingsViewModel.validateConnection(
+            address: draftAddress,
+            port: draftPort,
+            key: draftKey,
+            secret: draftSecret
+        )
+    }
+
+    private var isAddressValid: Bool {
+        let trimmedAddress = draftAddress.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedAddress.isEmpty else { return false }
+
+        let normalizedAddress = trimmedAddress.contains("://") ? trimmedAddress : "https://\(trimmedAddress)"
+        guard let components = URLComponents(string: normalizedAddress),
+              let host = components.host else {
+            return false
+        }
+
+        return !host.isEmpty
+    }
+
+    private var isPortValid: Bool {
+        let trimmedPort = draftPort.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let portValue = Int(trimmedPort) else { return false }
+        return (1...65535).contains(portValue)
+    }
+
+    private var isKeyValid: Bool {
+        !draftKey.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var isSecretValid: Bool {
+        !draftSecret.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+
+    private var canTestConnection: Bool {
+        isAddressValid && isPortValid && isKeyValid && isSecretValid
+    }
+
+    private var hasSetupChanges: Bool {
+        draftAddress != viewModel.address ||
+        draftPort != viewModel.port ||
+        draftKey != viewModel.key ||
+        draftSecret != viewModel.secret
     }
 
     private func connectionStatusColor(for validation: ConnectionValidation) -> Color {
@@ -175,12 +248,34 @@ struct SettingsView: View {
         }
     }
 
+    private func loadDrafts() {
+        draftAddress = viewModel.address
+        draftPort = viewModel.port
+        draftKey = viewModel.key
+        draftSecret = viewModel.secret
+    }
+
+    private func saveSettings() {
+        viewModel.saveConnection(address: draftAddress, port: draftPort)
+        viewModel.saveCredentials(
+            key: draftKey.trimmingCharacters(in: .whitespacesAndNewlines),
+            secret: draftSecret.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
+        loadDrafts()
+        testConnectionMessage = nil
+    }
+
     private func testConnection() async {
         isTestingConnection = true
         testConnectionMessage = nil
 
         do {
-            try await WOLService(viewModel: viewModel).testConnection()
+            try await WOLService(
+                address: draftAddress,
+                port: draftPort,
+                key: draftKey,
+                secret: draftSecret
+            ).testConnection()
             testConnectionMessage = "Connection succeeded."
             testConnectionColor = .green
         } catch {
@@ -191,31 +286,19 @@ struct SettingsView: View {
         isTestingConnection = false
     }
 
-    private var hasCredentialChanges: Bool {
-        draftKey != viewModel.key || draftSecret != viewModel.secret
-    }
-
-    private func loadCredentialDrafts() {
-        draftKey = viewModel.key
-        draftSecret = viewModel.secret
-    }
-
-    private func saveCredentials() {
-        viewModel.saveCredentials(
-            key: draftKey.trimmingCharacters(in: .whitespacesAndNewlines),
-            secret: draftSecret.trimmingCharacters(in: .whitespacesAndNewlines)
-        )
-    }
-
-    private func clearCredentials() {
+    private func resetSettingsAndShowOnboarding() {
+        viewModel.clearConnection()
         viewModel.clearCredentials()
-        loadCredentialDrafts()
+        loadDrafts()
+        testConnectionMessage = nil
+        appPreferences.resetOnboarding()
+        NSApplication.shared.activate(ignoringOtherApps: true)
+        openWindow(id: AppSceneID.onboarding)
     }
 }
 
 private enum SettingsTab: Hashable {
-    case connection
-    case credentials
+    case setup
     case general
 }
 

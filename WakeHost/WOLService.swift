@@ -42,10 +42,25 @@ enum WOLServiceError: LocalizedError {
 
 final class WOLService {
     private static let logger = Logger(subsystem: "com.dohnesorge.WakeHost", category: "network")
-    private let viewModel: SettingsViewModel
+    private let address: String
+    private let port: String
+    private let key: String
+    private let secret: String
 
-    init(viewModel: SettingsViewModel) {
-        self.viewModel = viewModel
+    convenience init(viewModel: SettingsViewModel) {
+        self.init(
+            address: viewModel.address,
+            port: viewModel.port,
+            key: viewModel.key,
+            secret: viewModel.secret
+        )
+    }
+
+    init(address: String, port: String, key: String, secret: String) {
+        self.address = address
+        self.port = port
+        self.key = key
+        self.secret = secret
     }
 
     func testConnection() async throws {
@@ -107,10 +122,10 @@ final class WOLService {
     }
 
     private func configuration() throws -> Configuration {
-        let trimmedAddress = viewModel.address.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedPort = viewModel.port.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedKey = viewModel.key.trimmingCharacters(in: .whitespacesAndNewlines)
-        let trimmedSecret = viewModel.secret.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAddress = address.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedPort = port.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedKey = key.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedSecret = secret.trimmingCharacters(in: .whitespacesAndNewlines)
 
         guard !trimmedAddress.isEmpty else {
             throw WOLServiceError.missingAddress

@@ -18,12 +18,12 @@ struct WakeHostApp: App {
 
     var body: some Scene {
         MenuBarExtra("WakeHost", systemImage: "power.circle") {
-            ContentView(settingsViewModel: settingsViewModel)
+            ContentView(settingsViewModel: settingsViewModel, appPreferences: appPreferences)
         }
         .menuBarExtraStyle(.window)
 
         Window("Welcome to WakeHost", id: AppSceneID.onboarding) {
-            OnboardingView(appPreferences: appPreferences)
+            OnboardingView(viewModel: settingsViewModel, appPreferences: appPreferences)
         }
         .defaultLaunchBehavior(appPreferences.hasCompletedOnboarding ? .suppressed : .presented)
         .restorationBehavior(.disabled)

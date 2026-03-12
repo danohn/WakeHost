@@ -9,8 +9,10 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(\.openSettings) private var openSettings
+    @Environment(\.openWindow) private var openWindow
 
     @ObservedObject var settingsViewModel: SettingsViewModel
+    @ObservedObject var appPreferences: AppPreferences
 
     @State private var hosts: [WOLHost] = []
     @State private var isLoading = false
@@ -38,38 +40,46 @@ struct ContentView: View {
                 messageChip(text: statusMessage.text, color: statusMessage.color)
             }
 
-            if let errorMessage {
+            if !appPreferences.hasCompletedOnboarding {
+                onboardingState
+            } else if let errorMessage {
                 messageChip(text: errorMessage, color: .red)
             } else if hosts.isEmpty {
                 Text("No hosts found.")
                     .foregroundStyle(.secondary)
             } else {
-                List(hosts) { host in
-                    HStack {
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text(host.displayName)
-                            Text(host.mac)
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        Spacer()
-                        if isWakingHostID == host.id {
-                            ProgressView()
-                                .frame(width: 56)
-                        } else {
-                            Button("Wake") {
-                                Task {
-                                    await wake(host)
+                ScrollView {
+                    LazyVStack(spacing: 10) {
+                        ForEach(hosts) { host in
+                            HStack {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(host.displayName)
+                                    Text(host.mac)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if isWakingHostID == host.id {
+                                    ProgressView()
+                                        .frame(width: 56)
+                                } else {
+                                    Button("Wake") {
+                                        Task {
+                                            await wake(host)
+                                        }
+                                    }
+                                    .buttonStyle(.glassProminent)
+                                    .controlSize(.small)
+                                    .frame(width: 56)
+                                    .disabled(isLoading)
                                 }
                             }
-                            .buttonStyle(.glassProminent)
-                            .controlSize(.small)
-                            .frame(width: 56)
-                            .disabled(isLoading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
+                    .padding(.vertical, 2)
                 }
-                .frame(height: 240)
+                .frame(maxHeight: hostListHeight)
             }
 
             Divider()
@@ -108,8 +118,35 @@ struct ContentView: View {
         .padding()
         .frame(width: 360)
         .task(id: settingsViewModel.connectionFingerprint) {
+            guard appPreferences.hasCompletedOnboarding else {
+                hosts = []
+                errorMessage = nil
+                return
+            }
             await fetchHosts()
         }
+    }
+
+    private var onboardingState: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Finish setup to load your Wake-on-LAN hosts.")
+                .foregroundStyle(.secondary)
+
+            Button("Open Setup") {
+                NSApplication.shared.activate(ignoringOtherApps: true)
+                openWindow(id: AppSceneID.onboarding)
+            }
+            .buttonStyle(.glass)
+            .controlSize(.small)
+        }
+        .padding(.vertical, 4)
+    }
+
+    private var hostListHeight: CGFloat {
+        let rowHeight: CGFloat = 36
+        let rowSpacing: CGFloat = 10
+        let contentHeight = CGFloat(hosts.count) * rowHeight + CGFloat(max(hosts.count - 1, 0)) * rowSpacing + 4
+        return min(max(contentHeight, rowHeight), 220)
     }
 
     private func fetchHosts() async {
@@ -165,5 +202,5 @@ private struct StatusMessage {
 }
 
 #Preview {
-    ContentView(settingsViewModel: SettingsViewModel())
+    ContentView(settingsViewModel: SettingsViewModel(), appPreferences: AppPreferences())
 }

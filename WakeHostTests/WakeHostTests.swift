@@ -17,7 +17,7 @@ struct WakeHostTests {
             secret: "secret"
         )
 
-        #expect(validation == .warning("Enter your OPNsense address."))
+        #expect(validation == .warning("Enter your OPNsense IP address or hostname."))
     }
 
     @MainActor @Test func connectionValidationRejectsInvalidAddress() async throws {
@@ -28,7 +28,7 @@ struct WakeHostTests {
             secret: "secret"
         )
 
-        #expect(validation == .error("Enter a valid OPNsense address."))
+        #expect(validation == .error("Enter a valid IP address or hostname."))
     }
 
     @MainActor @Test func connectionValidationRequiresPort() async throws {

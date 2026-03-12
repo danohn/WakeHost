@@ -17,10 +17,13 @@ final class AppPreferences: ObservableObject {
     @Published var loginItemErrorMessage: String?
 
     private static let hasCompletedOnboardingKey = "has_completed_onboarding"
+    private static let forceOnboardingLaunchArgument = "--uitest-force-onboarding"
     private let loginItemService = SMAppService.mainApp
 
     init() {
-        hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Self.hasCompletedOnboardingKey)
+        let defaultsValue = UserDefaults.standard.bool(forKey: Self.hasCompletedOnboardingKey)
+        let forceOnboarding = ProcessInfo.processInfo.arguments.contains(Self.forceOnboardingLaunchArgument)
+        hasCompletedOnboarding = forceOnboarding ? false : defaultsValue
         loginItemStatus = loginItemService.status
     }
 
@@ -88,5 +91,9 @@ final class AppPreferences: ObservableObject {
 
     func completeOnboarding() {
         hasCompletedOnboarding = true
+    }
+
+    func resetOnboarding() {
+        hasCompletedOnboarding = false
     }
 }

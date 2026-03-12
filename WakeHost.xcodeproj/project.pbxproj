@@ -414,8 +414,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WakeHost connects to your OPNsense router on your local network to fetch Wake-on-LAN hosts and send wake requests.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WakeHost connects to your OPNsense router on your local network to fetch Wake-on-LAN hosts and send wake requests.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
@@ -458,8 +458,8 @@
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_LSUIElement = YES;
-				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WakeHost connects to your OPNsense router on your local network to fetch Wake-on-LAN hosts and send wake requests.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "WakeHost connects to your OPNsense router on your local network to fetch Wake-on-LAN hosts and send wake requests.";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/../Frameworks",
