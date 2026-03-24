@@ -10,6 +10,7 @@ jobs:
     runs-on: macos-26
     permissions:
       contents: write
+      id-token: write   # REQUIRED for attestation
 
     steps:
       - name: Checkout
@@ -110,7 +111,6 @@ jobs:
           ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
           ASC_ISSUER: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
         run: |
-          # Reuse key file from earlier step
           printf '%s' "$ASC_KEY" > /tmp/asc_key.p8
 
           ditto -c -k --keepParent build/WakeHost.dmg /tmp/WakeHost-dmg.zip
@@ -125,13 +125,18 @@ jobs:
         run: |
           xcrun stapler staple build/WakeHost.dmg
 
-      - name: Verify Signatures (optional)
+      - name: Verify Signatures
         run: |
           echo "Checking app:"
           spctl -a -vv build/WakeHost.app || true
 
-          echo "Checking DMG (correct mode):"
+          echo "Checking DMG:"
           spctl -a -vv -t open --context context:primary-signature build/WakeHost.dmg || true
+
+      - name: Generate Artifact Attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: build/WakeHost.dmg
 
       - name: Create GitHub Release and Upload DMG
         env:
