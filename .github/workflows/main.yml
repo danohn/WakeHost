@@ -53,6 +53,7 @@ jobs:
             --deep \
             --force \
             --options runtime \
+            --entitlements WakeHost/WakeHost.entitlements \
             --sign "Developer ID Application" \
             --timestamp \
             build/WakeHost.app
@@ -130,6 +131,8 @@ jobs:
         run: |
           echo "Checking app:"
           spctl -a -vv build/WakeHost.app || true
+          echo "App entitlements:"
+          codesign -d --entitlements :- build/WakeHost.app || true
 
           echo "Checking DMG:"
           spctl -a -vv -t open --context context:primary-signature build/WakeHost.dmg || true
