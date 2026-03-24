@@ -5,26 +5,7 @@ import Security
 struct KeychainHelper {
     private static let service = "com.dohnesorge.WakeHost"
     private static let useDataProtectionKeychain = true
-    private static let accessGroupEntitlement = "keychain-access-groups" as CFString
-    private static let applicationIdentifierEntitlement = "application-identifier" as CFString
     private static let itemAccessibility = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
-
-    private static let accessGroup: String? = {
-        guard let task = SecTaskCreateFromSelf(nil) else { return nil }
-
-        if let groups = SecTaskCopyValueForEntitlement(task, accessGroupEntitlement, nil) as? [String],
-           let group = groups.first(where: { $0.hasSuffix(service) }) ?? groups.first {
-            return group
-        }
-
-        if let applicationIdentifier = SecTaskCopyValueForEntitlement(task, applicationIdentifierEntitlement, nil) as? String,
-           let separatorIndex = applicationIdentifier.firstIndex(of: ".") {
-            let prefix = applicationIdentifier[..<separatorIndex]
-            return "\(prefix).\(service)"
-        }
-
-        return nil
-    }()
 
     static func set(_ value: String, forKey key: String) {
         guard let data = value.data(using: .utf8) else { return }
@@ -64,10 +45,6 @@ struct KeychainHelper {
             kSecAttrAccount as String: key,
             kSecUseDataProtectionKeychain as String: useDataProtectionKeychain
         ]
-
-        if let accessGroup {
-            query[kSecAttrAccessGroup as String] = accessGroup
-        }
 
         if returningData {
             query[kSecReturnData as String] = true
