@@ -71,7 +71,7 @@ jobs:
             --issuer "$ASC_ISSUER" \
             --wait
 
-      - name: Staple Notarization
+      - name: Staple Notarization (App)
         run: |
           xcrun stapler staple build/WakeHost.app
 
@@ -95,6 +95,23 @@ jobs:
             --no-internet-enable \
             build/WakeHost.dmg \
             dmg/
+
+      - name: Sign DMG
+        run: |
+          codesign \
+            --force \
+            --sign "Developer ID Application" \
+            --timestamp \
+            build/WakeHost.dmg
+
+      - name: Staple Notarization (DMG)
+        run: |
+          xcrun stapler staple build/WakeHost.dmg
+
+      - name: Verify Signatures (optional but useful)
+        run: |
+          spctl -a -vv build/WakeHost.app || true
+          spctl -a -vv build/WakeHost.dmg || true
 
       - name: Create GitHub Release and Upload DMG
         env:
