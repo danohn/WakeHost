@@ -30,32 +30,60 @@ jobs:
         run: |
           cp -R build/WakeHost.xcarchive/Products/Applications/WakeHost.app build/WakeHost.app
 
-      - name: Write credentials to files
+      - name: Import Developer ID Certificate
         env:
           P12_DATA: ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
-          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          P12_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
         run: |
-          echo "$P12_DATA" | base64 --decode > /tmp/certificate.p12
-          printf '%s' "$ASC_KEY" > /tmp/app_store_connect.p8
+          # Create a temporary keychain
+          security create-keychain -p "" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "" build.keychain
 
-      - name: Sign and Notarize
-        uses: indygreg/apple-code-sign-action@v1
-        with:
-          input_path: build/WakeHost.app
-          output_path: build/WakeHost-signed.app
-          p12_file: /tmp/certificate.p12
-          p12_password: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
-          notarize: true
-          staple: true
-          app_store_connect_api_issuer: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
-          app_store_connect_api_key: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          app_store_connect_api_key_json_file: /tmp/app_store_connect.p8
+          # Import the certificate
+          echo "$P12_DATA" | base64 --decode > /tmp/certificate.p12
+          security import /tmp/certificate.p12 -k build.keychain -P "$P12_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -d user -s build.keychain login.keychain
+          security set-key-partition-list -S apple-tool:,apple: -s -k "" build.keychain
+
+      - name: Sign App
+        run: |
+          codesign \
+            --deep \
+            --force \
+            --options runtime \
+            --sign "Developer ID Application" \
+            --timestamp \
+            build/WakeHost.app
+
+      - name: Notarize App
+        env:
+          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
+        run: |
+          # Write the .p8 key file
+          printf '%s' "$ASC_KEY" > /tmp/asc_key.p8
+
+          # Create a zip for notarization (notarytool requires zip or dmg, not .app directly)
+          ditto -c -k --keepParent build/WakeHost.app /tmp/WakeHost.zip
+
+          # Submit for notarization and wait for result
+          xcrun notarytool submit /tmp/WakeHost.zip \
+            --key /tmp/asc_key.p8 \
+            --key-id "$ASC_KEY_ID" \
+            --issuer "$ASC_ISSUER" \
+            --wait
+
+      - name: Staple Notarization
+        run: |
+          xcrun stapler staple build/WakeHost.app
 
       - name: Create DMG
         run: |
           hdiutil create \
             -volname "WakeHost" \
-            -srcfolder build/WakeHost-signed.app \
+            -srcfolder build/WakeHost.app \
             -ov -format UDZO \
             build/WakeHost.dmg
 
