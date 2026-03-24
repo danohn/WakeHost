@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build Archive
+        run: |
+          xcodebuild archive \
+            -project WakeHost.xcodeproj \
+            -scheme WakeHost \
+            -configuration Release \
+            -archivePath build/WakeHost.xcarchive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Export .app from Archive
+        run: |
+          cp -R build/WakeHost.xcarchive/Products/Applications/WakeHost.app build/WakeHost.app
+
+      - name: Sign and Notarize
+        uses: indygreg/apple-code-sign-action@v1
+        with:
+          input_path: build/WakeHost.app
+          output_path: build/WakeHost-signed.app
+          p12_file_base64: ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
+          p12_password: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+          notarize: true
+          staple: true
+          app_store_connect_api_issuer: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
+          app_store_connect_api_key: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          app_store_connect_api_key_path: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+
+      - name: Create DMG
+        run: |
+          hdiutil create \
+            -volname "WakeHost" \
+            -srcfolder build/WakeHost-signed.app \
+            -ov -format UDZO \
+            build/WakeHost.dmg
+
+      - name: Upload to GitHub Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload ${{ github.ref_name }} build/WakeHost.dmg
