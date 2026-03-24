@@ -10,7 +10,8 @@ jobs:
     runs-on: macos-26
     permissions:
       contents: write
-      id-token: write   # REQUIRED for attestation
+      id-token: write
+      attestations: write
 
     steps:
       - name: Checkout
