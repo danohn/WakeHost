@@ -104,11 +104,28 @@ jobs:
             --timestamp \
             build/WakeHost.dmg
 
+      - name: Notarize DMG
+        env:
+          ASC_KEY: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          ASC_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          ASC_ISSUER: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
+        run: |
+          # Reuse key file from earlier step
+          printf '%s' "$ASC_KEY" > /tmp/asc_key.p8
+
+          ditto -c -k --keepParent build/WakeHost.dmg /tmp/WakeHost-dmg.zip
+
+          xcrun notarytool submit /tmp/WakeHost-dmg.zip \
+            --key /tmp/asc_key.p8 \
+            --key-id "$ASC_KEY_ID" \
+            --issuer "$ASC_ISSUER" \
+            --wait
+
       - name: Staple Notarization (DMG)
         run: |
           xcrun stapler staple build/WakeHost.dmg
 
-      - name: Verify Signatures (optional but useful)
+      - name: Verify Signatures (optional)
         run: |
           spctl -a -vv build/WakeHost.app || true
           spctl -a -vv build/WakeHost.dmg || true
