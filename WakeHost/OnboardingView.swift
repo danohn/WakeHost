@@ -36,6 +36,8 @@ struct OnboardingView: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
 
+            setupInstructions
+
             VStack(alignment: .leading, spacing: 12) {
                 VStack(alignment: .leading, spacing: 6) {
                     fieldLabel("Address", isValid: isAddressValid && focusedField != .address)
@@ -131,6 +133,40 @@ struct OnboardingView: View {
         .onAppear {
             loadDrafts()
         }
+    }
+
+    private var setupInstructions: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("OPNsense Prerequisites")
+                .font(.headline)
+
+            VStack(alignment: .leading, spacing: 8) {
+                instructionRow(
+                    "1.",
+                    "In the OPNsense web interface, open Firmware > Plugins and install the os-wol plugin."
+                )
+                instructionRow(
+                    "2.",
+                    "Open Services > Wake on LAN and create a static Wake-on-LAN entry for each device you want WakeHost to manage."
+                )
+                instructionRow(
+                    "3.",
+                    "Open System > Access > Users and create a dedicated API user for WakeHost."
+                )
+                instructionRow(
+                    "4.",
+                    "Assign the privilege \"Services: Wake on LAN\" to that user."
+                )
+                instructionRow(
+                    "5.",
+                    "From the user details page, select \"Create and download API key for this user\", then paste the downloaded key and secret into WakeHost."
+                )
+            }
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
+        .padding(16)
+        .background(.thinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
 
     private var isAddressValid: Bool {
@@ -238,6 +274,15 @@ struct OnboardingView: View {
                     .foregroundStyle(.green)
                     .accessibilityHidden(true)
             }
+        }
+    }
+
+    private func instructionRow(_ step: String, _ text: String) -> some View {
+        HStack(alignment: .top, spacing: 8) {
+            Text(step)
+                .fontWeight(.semibold)
+            Text(text)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 }
