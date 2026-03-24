@@ -127,8 +127,11 @@ jobs:
 
       - name: Verify Signatures (optional)
         run: |
+          echo "Checking app:"
           spctl -a -vv build/WakeHost.app || true
-          spctl -a -vv build/WakeHost.dmg || true
+
+          echo "Checking DMG (correct mode):"
+          spctl -a -vv -t open --context context:primary-signature build/WakeHost.dmg || true
 
       - name: Create GitHub Release and Upload DMG
         env:
