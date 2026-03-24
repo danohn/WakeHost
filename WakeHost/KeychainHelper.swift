@@ -4,8 +4,7 @@ import Security
 /// A simple helper for storing/retrieving strings in the keychain.
 struct KeychainHelper {
     private static let service = "com.dohnesorge.WakeHost"
-    private static let migrationDefaultsKey = "keychainMigrated"
-    private static let credentialKeys = ["opn_key", "opn_secret"]
+    private static let useDataProtectionKeychain = true
     private static let accessGroupEntitlement = "keychain-access-groups" as CFString
     private static let applicationIdentifierEntitlement = "application-identifier" as CFString
     private static let itemAccessibility = kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly
@@ -55,19 +54,6 @@ struct KeychainHelper {
         SecItemDelete(scopedQuery(for: key) as CFDictionary)
     }
 
-    static func migrateLegacyItemsIfNeeded() {
-        guard !UserDefaults.standard.bool(forKey: migrationDefaultsKey) else { return }
-        guard accessGroup != nil else { return }
-
-        for key in credentialKeys {
-            guard get(key) == nil, let legacyValue = getLegacy(key) else { continue }
-            set(legacyValue, forKey: key)
-            deleteLegacy(key)
-        }
-
-        UserDefaults.standard.set(true, forKey: migrationDefaultsKey)
-    }
-
     private static func scopedQuery(
         for key: String,
         returningData: Bool = false
@@ -75,7 +61,8 @@ struct KeychainHelper {
         var query: [String: Any] = [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: service,
-            kSecAttrAccount as String: key
+            kSecAttrAccount as String: key,
+            kSecUseDataProtectionKeychain as String: useDataProtectionKeychain
         ]
 
         if let accessGroup {
@@ -88,39 +75,5 @@ struct KeychainHelper {
         }
 
         return query
-    }
-
-    private static func legacyQuery(
-        for key: String,
-        returningData: Bool = false
-    ) -> [String: Any] {
-        var query: [String: Any] = [
-            kSecClass as String: kSecClassGenericPassword,
-            kSecAttrService as String: service,
-            kSecAttrAccount as String: key
-        ]
-
-        if returningData {
-            query[kSecReturnData as String] = true
-            query[kSecMatchLimit as String] = kSecMatchLimitOne
-        }
-
-        return query
-    }
-
-    private static func getLegacy(_ key: String) -> String? {
-        let query = legacyQuery(for: key, returningData: true)
-        var dataTypeRef: AnyObject?
-        let status = SecItemCopyMatching(query as CFDictionary, &dataTypeRef)
-
-        if status == errSecSuccess, let data = dataTypeRef as? Data {
-            return String(data: data, encoding: .utf8)
-        }
-
-        return nil
-    }
-
-    private static func deleteLegacy(_ key: String) {
-        SecItemDelete(legacyQuery(for: key) as CFDictionary)
     }
 }

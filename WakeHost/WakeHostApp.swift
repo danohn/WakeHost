@@ -17,7 +17,6 @@ struct WakeHostApp: App {
     @StateObject private var settingsViewModel: SettingsViewModel
 
     init() {
-        KeychainHelper.migrateLegacyItemsIfNeeded()
         _appPreferences = StateObject(wrappedValue: AppPreferences())
         _settingsViewModel = StateObject(wrappedValue: SettingsViewModel())
     }
