@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>WakeHost — OPNsense Menu Bar Utility</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "tertiary-fixed-dim": "#cbc6b9",
+              "surface-container-lowest": "#ffffff",
+              "secondary-fixed": "#e4e2e2",
+              "background": "#fbf9f8",
+              "outline-variant": "#c1c6d6",
+              "on-secondary": "#ffffff",
+              "on-tertiary": "#ffffff",
+              "primary-fixed": "#d8e2ff",
+              "on-error-container": "#93000a",
+              "primary-fixed-dim": "#adc7ff",
+              "outline": "#727785",
+              "surface-bright": "#fbf9f8",
+              "secondary-fixed-dim": "#c7c6c6",
+              "surface-dim": "#dcd9d9",
+              "on-secondary-container": "#626262",
+              "on-tertiary-fixed-variant": "#49473d",
+              "surface-tint": "#005bc0",
+              "primary-container": "#1a73e8",
+              "on-tertiary-fixed": "#1d1c13",
+              "surface-container-highest": "#e4e2e1",
+              "inverse-surface": "#303030",
+              "inverse-primary": "#adc7ff",
+              "tertiary-fixed": "#e7e2d4",
+              "on-primary-container": "#ffffff",
+              "on-primary": "#ffffff",
+              "on-primary-fixed-variant": "#004493",
+              "on-error": "#ffffff",
+              "tertiary-container": "#7a776b",
+              "surface-container": "#f0eded",
+              "surface-container-low": "#f6f3f2",
+              "on-surface": "#1b1c1c",
+              "error-container": "#ffdad6",
+              "primary": "#005bbf",
+              "on-background": "#1b1c1c",
+              "on-secondary-fixed-variant": "#464747",
+              "tertiary": "#615e54",
+              "error": "#ba1a1a",
+              "secondary-container": "#e1dfdf",
+              "surface-container-high": "#eae7e7",
+              "inverse-on-surface": "#f3f0f0",
+              "on-secondary-fixed": "#1b1c1c",
+              "surface-variant": "#e4e2e1",
+              "secondary": "#5e5e5e",
+              "on-primary-fixed": "#001a41",
+              "on-tertiary-container": "#060502",
+              "surface": "#fbf9f8",
+              "on-surface-variant": "#414754"
+            },
+            fontFamily: {
+              "headline": ["Plus Jakarta Sans"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .glass-nav {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+      }
+      .hero-gradient {
+        background: linear-gradient(135deg, #005bbf 0%, #1a73e8 100%);
+      }
+      .ambient-shadow {
+        box-shadow: 0 32px 64px -12px rgba(27, 28, 28, 0.08);
+      }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dark/80 backdrop-blur-xl shadow-sm shadow-black/5">
+<div class="flex justify-between items-center max-w-7xl mx-auto px-6 h-16">
+<div class="flex items-center gap-8">
+<a class="text-xl font-bold text-on-surface dark:text-on-surface-dark tracking-tighter font-headline" href="#">WakeHost</a>
+<div class="hidden md:flex gap-6">
+<a class="text-on-surface-variant dark:text-on-surface-variant-dark hover:text-primary transition-colors font-headline font-semibold tracking-tight" href="#features">Features</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant-dark hover:text-primary transition-colors font-headline font-semibold tracking-tight" href="#setup">Setup</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant-dark hover:text-primary transition-colors font-headline font-semibold tracking-tight" href="#security">Security</a>
+<a class="text-on-surface-variant dark:text-on-surface-variant-dark hover:text-primary transition-colors font-headline font-semibold tracking-tight" href="https://github.com">GitHub</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<a class="hidden sm:block text-on-surface-variant font-headline font-semibold px-4 py-2 hover:bg-surface-container-highest/50 rounded-full transition-all" href="https://github.com">GitHub</a>
+<a class="hero-gradient text-on-primary px-6 py-2 rounded-full font-headline font-semibold shadow-lg shadow-primary/20 active:scale-95 duration-200 ease-out" href="#">Download</a>
+</div>
+</div>
+</nav>
+<main class="pt-16">
+<!-- Hero Section -->
+<section class="relative px-6 pt-24 pb-32 md:pt-40 md:pb-52 overflow-hidden">
+<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7 z-10">
+<h1 class="text-5xl md:text-7xl font-headline font-extrabold text-on-surface leading-[1.1] tracking-tight mb-8">
+                        Wake devices through OPNsense from your menu bar.
+                    </h1>
+<p class="text-xl md:text-2xl text-on-surface-variant max-w-2xl mb-12 leading-relaxed">
+                        A lightweight app for refreshing Wake-on-LAN hosts without opening a browser or a full window. Instant access, minimal footprint.
+                    </p>
+<div class="flex flex-col sm:flex-row gap-4">
+<button class="hero-gradient text-on-primary px-8 py-4 rounded-full text-lg font-headline font-bold shadow-xl shadow-primary/25 active:scale-95 transition-transform">
+                            Download for Mac
+                        </button>
+<button class="bg-surface-container-highest text-on-surface px-8 py-4 rounded-full text-lg font-headline font-bold hover:bg-surface-container-high active:scale-95 transition-transform">
+                            View on GitHub
+                        </button>
+</div>
+</div>
+<div class="lg:col-span-5 relative">
+<div class="relative w-full rounded-lg bg-surface-container-low ambient-shadow overflow-hidden border border-outline-variant/30">
+<img alt="WakeHost App Interface" class="w-full h-auto block" src="https://lh3.googleusercontent.com/aida/ADBb0ui39q6JNeWeRTpvfOiVhJQejZMw79RK7QMw0YUMvls4km00xPCGNXBjgge5L3t8uKFBuvhu5K3KinUj3RxAeNZGwpTvT_wh1TRuBD48DIDURWV5qQhSZNfItTl97DTyLDeSxw0iPKlfPiHDkj0m7FIXeMGJw65XK0tZrKmgC7hCBMzpyZV1hJUmhJqcyGAg1CboPjMLw2O5gwakUkTwFhKPB8YAYG7X_Q7wuKM08vNaG9oYcXt0KCBr-PQ-QA84Q_qlvR06Ccc"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent pointer-events-none"></div>
+</div>
+<!-- Decorative background blur behind the window -->
+<div class="absolute -z-10 -bottom-10 -left-10 w-64 h-64 bg-primary/10 rounded-full blur-3xl"></div>
+</div>
+</div>
+<!-- Abstract background shape -->
+<div class="absolute -top-24 -right-24 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl"></div>
+</section>
+<!-- Features Bento Grid -->
+<section class="py-24 px-6 bg-surface-container-low" id="features">
+<div class="max-w-7xl mx-auto">
+<div class="mb-16">
+<h2 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tight text-on-surface mb-4">Native performance. Zero bloat.</h2>
+<p class="text-lg text-on-surface-variant max-w-xl">Designed to feel like a native part of your macOS environment.</p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Feature 1 -->
+<div class="bg-surface-container-lowest p-10 rounded-lg ambient-shadow flex flex-col h-full">
+<div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-8">
+<span class="material-symbols-outlined text-3xl">desktop_windows</span>
+</div>
+<h3 class="text-2xl font-headline font-bold mb-4">Menu bar first</h3>
+<p class="text-on-surface-variant leading-relaxed">No bulky windows. Access your entire network list directly from the top of your screen with a single click.</p>
+</div>
+<!-- Feature 2 -->
+<div class="bg-surface-container-lowest p-10 rounded-lg ambient-shadow flex flex-col h-full">
+<div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-8">
+<span class="material-symbols-outlined text-3xl">auto_fix_high</span>
+</div>
+<h3 class="text-2xl font-headline font-bold mb-4">Guided setup</h3>
+<p class="text-on-surface-variant leading-relaxed">Connecting to OPNsense shouldn't be hard. Our setup wizard gets you running in under sixty seconds.</p>
+</div>
+<!-- Feature 3 -->
+<div class="bg-surface-container-lowest p-10 rounded-lg ambient-shadow flex flex-col h-full">
+<div class="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-8">
+<span class="material-symbols-outlined text-3xl">lock</span>
+</div>
+<h3 class="text-2xl font-headline font-bold mb-4">Local credentials</h3>
+<p class="text-on-surface-variant leading-relaxed">Your OPNsense API keys never leave your machine. We use macOS Keychain for secure local-only storage.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Requirements Section -->
+<section class="py-32 px-6" id="setup">
+<div class="max-w-7xl mx-auto">
+<div class="bg-surface-container-highest rounded-xl p-12 md:p-20 overflow-hidden relative">
+<div class="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div>
+<span class="inline-block px-4 py-1 bg-primary text-on-primary text-xs font-bold rounded-full mb-6 uppercase tracking-widest">Requirements</span>
+<h2 class="text-4xl md:text-5xl font-headline font-extrabold tracking-tight text-on-surface mb-8">Built for the modern admin.</h2>
+<ul class="space-y-6">
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="font-bold">macOS 12.0 or later</p>
+<p class="text-on-surface-variant text-sm">Optimized for Apple Silicon and Intel Macs.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="font-bold">OPNsense 23.x+</p>
+<p class="text-on-surface-variant text-sm">Requires an active OPNsense firewall with API access.</p>
+</div>
+</li>
+<li class="flex items-start gap-4">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<div>
+<p class="font-bold">Wake-on-LAN Plugin</p>
+<p class="text-on-surface-variant text-sm">Ensure the WOL plugin is enabled in your dashboard.</p>
+</div>
+</li>
+</ul>
+</div>
+<div class="flex flex-wrap gap-4 justify-start lg:justify-center">
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm min-w-[160px] flex-1">
+<p class="text-3xl font-headline font-extrabold text-primary mb-1">100%</p>
+<p class="text-sm font-semibold opacity-70">Open Source</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-lg shadow-sm min-w-[160px] flex-1">
+<p class="text-3xl font-headline font-extrabold text-primary mb-1">Swift</p>
+<p class="text-sm font-semibold opacity-70">Native App</p>
+</div>
+</div>
+</div>
+<!-- Decorative background blur -->
+<div class="absolute bottom-0 right-0 w-96 h-96 bg-primary/10 blur-[100px] rounded-full translate-x-1/2 translate-y-1/2"></div>
+</div>
+</div>
+</section>
+<!-- Final CTA -->
+<section class="py-24 px-6 text-center">
+<div class="max-w-3xl mx-auto">
+<h2 class="text-4xl md:text-5xl font-headline font-extrabold mb-8 tracking-tight">Ready to wake up your network?</h2>
+<p class="text-xl text-on-surface-variant mb-12">Join hundreds of OPNsense users who have simplified their daily workflow.</p>
+<div class="flex flex-col sm:flex-row justify-center gap-6">
+<button class="hero-gradient text-on-primary px-10 py-5 rounded-full text-xl font-headline font-bold shadow-2xl shadow-primary/30 active:scale-95 transition-transform">
+                        Get WakeHost for Mac
+                    </button>
+</div>
+<p class="mt-8 text-on-surface-variant/60 text-sm">Version 1.2.4 — Universal Binary</p>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full py-12 mt-20 bg-surface-container-low dark:bg-surface-container-low-dark">
+<div class="flex flex-col md:flex-row justify-between items-center max-w-7xl mx-auto px-8 border-t border-outline-variant/15 pt-8">
+<div class="mb-6 md:mb-0">
+<span class="text-lg font-bold text-on-surface dark:text-on-surface-dark font-headline">WakeHost</span>
+<p class="font-['Inter'] text-sm text-on-surface-variant dark:text-on-surface-variant-dark mt-2">© 2024 WakeHost. Built for OPNsense.</p>
+</div>
+<div class="flex gap-8">
+<a class="text-on-surface-variant/80 hover:text-primary transition-colors font-['Inter'] text-sm hover:underline decoration-2 underline-offset-4" href="#">Privacy Policy</a>
+<a class="text-on-surface-variant/80 hover:text-primary transition-colors font-['Inter'] text-sm hover:underline decoration-2 underline-offset-4" href="#">GitHub</a>
+<a class="text-on-surface-variant/80 hover:text-primary transition-colors font-['Inter'] text-sm hover:underline decoration-2 underline-offset-4" href="#">Documentation</a>
+<a class="text-on-surface-variant/80 hover:text-primary transition-colors font-['Inter'] text-sm hover:underline decoration-2 underline-offset-4" href="#">Support</a>
+</div>
+</div>
+</footer>
+</body></html>

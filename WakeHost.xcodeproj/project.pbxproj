@@ -24,7 +24,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		6567BB302F6249E700EDD569 /* WakeHost.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WakeHost.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		6567BB302F6249E700EDD569 /* wakehost.dev */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = wakehost.dev; sourceTree = BUILT_PRODUCTS_DIR; };
 		6567BB3D2F6249E900EDD569 /* WakeHostTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WakeHostTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6567BB472F6249E900EDD569 /* WakeHostUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = WakeHostUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -85,7 +85,7 @@
 		6567BB312F6249E700EDD569 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6567BB302F6249E700EDD569 /* WakeHost.app */,
+				6567BB302F6249E700EDD569 /* wakehost.dev */,
 				6567BB3D2F6249E900EDD569 /* WakeHostTests.xctest */,
 				6567BB472F6249E900EDD569 /* WakeHostUITests.xctest */,
 			);
@@ -114,7 +114,7 @@
 			packageProductDependencies = (
 			);
 			productName = WakeHost;
-			productReference = 6567BB302F6249E700EDD569 /* WakeHost.app */;
+			productReference = 6567BB302F6249E700EDD569 /* wakehost.dev */;
 			productType = "com.apple.product-type.application";
 		};
 		6567BB3C2F6249E900EDD569 /* WakeHostTests */ = {
@@ -502,7 +502,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WakeHost.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WakeHost";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/wakehost.dev/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WakeHost";
 			};
 			name = Debug;
 		};
@@ -523,7 +523,7 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/WakeHost.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WakeHost";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/wakehost.dev/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/WakeHost";
 			};
 			name = Release;
 		};
