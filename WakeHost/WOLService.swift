@@ -46,6 +46,7 @@ final class WOLService {
     private let port: String
     private let key: String
     private let secret: String
+    private let sessionDelegate = NetworkSessionDelegate()
 
     convenience init(viewModel: SettingsViewModel) {
         self.init(
@@ -161,8 +162,13 @@ final class WOLService {
     }
 
     private func performRequest(_ request: URLRequest) async throws -> (Data, URLResponse) {
+        let session = URLSession(configuration: .ephemeral, delegate: sessionDelegate, delegateQueue: nil)
+        defer {
+            session.finishTasksAndInvalidate()
+        }
+
         do {
-            let (data, response) = try await URLSession.shared.data(for: request)
+            let (data, response) = try await session.data(for: request)
             return (data, response)
         } catch {
             let requestURL = request.url?.absoluteString ?? "<missing-url>"
@@ -205,5 +211,21 @@ final class WOLService {
 
     private struct WakeHostRequest: Encodable {
         let uuid: String
+    }
+
+    private final class NetworkSessionDelegate: NSObject, URLSessionDelegate {
+        func urlSession(
+            _ session: URLSession,
+            didReceive challenge: URLAuthenticationChallenge,
+            completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+        ) {
+            guard challenge.protectionSpace.authenticationMethod == NSURLAuthenticationMethodServerTrust,
+                  let serverTrust = challenge.protectionSpace.serverTrust else {
+                completionHandler(.performDefaultHandling, nil)
+                return
+            }
+
+            completionHandler(.useCredential, URLCredential(trust: serverTrust))
+        }
     }
 }

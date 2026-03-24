@@ -19,6 +19,7 @@ struct ContentView: View {
     @State private var errorMessage: String?
     @State private var isWakingHostID: String?
     @State private var statusMessage: StatusMessage?
+    @State private var statusDismissTask: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -156,7 +157,7 @@ struct ContentView: View {
         do {
             hosts = try await WOLService(viewModel: settingsViewModel).fetchHosts()
             if hosts.isEmpty {
-                statusMessage = nil
+                clearStatusMessage()
             }
         } catch {
             hosts = []
@@ -168,22 +169,47 @@ struct ContentView: View {
 
     private func wake(_ host: WOLHost) async {
         isWakingHostID = host.id
-        statusMessage = nil
+        clearStatusMessage()
 
         do {
             try await WOLService(viewModel: settingsViewModel).wakeHost(uuid: host.id)
-            statusMessage = StatusMessage(
+            showStatusMessage(StatusMessage(
                 text: "Wake packet sent to \(host.displayName).",
                 color: .green
-            )
+            ), autoDismissAfter: 3)
         } catch {
-            statusMessage = StatusMessage(
+            showStatusMessage(StatusMessage(
                 text: error.localizedDescription,
                 color: .red
-            )
+            ))
         }
 
         isWakingHostID = nil
+    }
+
+    private func showStatusMessage(_ message: StatusMessage, autoDismissAfter delay: TimeInterval? = nil) {
+        statusDismissTask?.cancel()
+        statusDismissTask = nil
+        statusMessage = message
+
+        guard let delay else {
+            return
+        }
+
+        statusDismissTask = Task {
+            try? await Task.sleep(for: .seconds(delay))
+            guard !Task.isCancelled else {
+                return
+            }
+            statusMessage = nil
+            statusDismissTask = nil
+        }
+    }
+
+    private func clearStatusMessage() {
+        statusDismissTask?.cancel()
+        statusDismissTask = nil
+        statusMessage = nil
     }
 
     private func messageChip(text: String, color: Color) -> some View {

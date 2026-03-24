@@ -45,7 +45,7 @@ struct SettingsView: View {
                         TextField(
                             "",
                             text: $draftPort,
-                            prompt: Text("7443")
+                            prompt: Text("443")
                         )
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 110)

@@ -13,8 +13,14 @@ enum AppSceneID {
 
 @main
 struct WakeHostApp: App {
-    @StateObject private var appPreferences = AppPreferences()
-    @StateObject private var settingsViewModel = SettingsViewModel()
+    @StateObject private var appPreferences: AppPreferences
+    @StateObject private var settingsViewModel: SettingsViewModel
+
+    init() {
+        KeychainHelper.migrateLegacyItemsIfNeeded()
+        _appPreferences = StateObject(wrappedValue: AppPreferences())
+        _settingsViewModel = StateObject(wrappedValue: SettingsViewModel())
+    }
 
     var body: some Scene {
         MenuBarExtra("WakeHost", systemImage: "power.circle") {
