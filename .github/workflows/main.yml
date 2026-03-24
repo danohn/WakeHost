@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: macos-26
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout
@@ -33,13 +35,13 @@ jobs:
         with:
           input_path: build/WakeHost.app
           output_path: build/WakeHost-signed.app
-          p12_file_base64: ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
+          p12_file: ${{ secrets.DEVELOPER_ID_CERTIFICATE_P12 }}
           p12_password: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
           notarize: true
           staple: true
           app_store_connect_api_issuer: ${{ secrets.APP_STORE_CONNECT_API_ISSUER }}
           app_store_connect_api_key: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
-          app_store_connect_api_key_path: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
+          app_store_connect_api_key_json_file: ${{ secrets.APP_STORE_CONNECT_API_KEY }}
 
       - name: Create DMG
         run: |
